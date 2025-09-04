@@ -1,6 +1,6 @@
-# CaiaAgent Core Service
+# CaiaAgent Core Service (Structured)
 
-This is the updated CaiaAgent Core API with /agent/report endpoint for n8n integration.
+This is the updated CaiaAgent Core API with proper package structure and /agent/report endpoint for n8n integration.
 
 ## Endpoints
 - `/` (redirects to N8N_UI_URL if set)
