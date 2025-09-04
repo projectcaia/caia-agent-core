@@ -81,9 +81,12 @@ async def debug():
         "service": SERVICE_NAME,
         "version": VERSION,
         "port": CAIA_PORT,
-        "port_type": "tcp",
         "environment": env,
-        "endpoints": ["/", "/health", "/ping", "/debug", "/agent/status", "/agent/health", "/agent/orchestrate", "/agent/proxy/n8n/{path}"],
+        "endpoints": [
+            "/", "/health", "/ping", "/debug",
+            "/agent/status", "/agent/health",
+            "/agent/orchestrate", "/agent/proxy/n8n/{path}"
+        ],
     }
 
 @app.get("/agent/status", operation_id="getAgentStatus")
