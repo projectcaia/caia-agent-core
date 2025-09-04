@@ -117,20 +117,22 @@ async def post_orchestrate(request: Request, authorization: Optional[str] = Head
         except Exception:
             body = {}
 
-    webhook_path = (body.get("webhook_path") or body.get("path") or "").lstrip("/")
+    # webhook path 결정
+    webhook_path = (body.get("webhook_path") or body.get("path") or DEFAULT_WEBHOOK_PATH).lstrip("/")
     method = str(body.get("method") or "POST").upper()
     payload = body.get("payload")
 
     if not webhook_path:
-        if DEFAULT_WEBHOOK_PATH:
-            webhook_path = DEFAULT_WEBHOOK_PATH
-            if payload is None and "message" in body:
-                payload = {"message": body.get("message")}
-        else:
-            raise HTTPException(status_code=400, detail="webhook_path is required (or set DEFAULT_WEBHOOK_PATH)")
+        return JSONResponse(
+            status_code=400,
+            content={"error": "webhook_path is required", "hint": "set webhook_path in body or DEFAULT_WEBHOOK_PATH env"}
+        )
 
     if not N8N_WEBHOOK_BASE:
-        raise HTTPException(status_code=500, detail="N8N_WEBHOOK_BASE is not configured")
+        return JSONResponse(
+            status_code=500,
+            content={"error": "N8N_WEBHOOK_BASE not configured", "hint": "set N8N_WEBHOOK_BASE env to your n8n domain"}
+        )
 
     target_url = f"{N8N_WEBHOOK_BASE}/{webhook_path}"
     try:
@@ -144,7 +146,8 @@ async def post_orchestrate(request: Request, authorization: Optional[str] = Head
         except Exception:
             return PlainTextResponse(resp.text, status_code=resp.status_code)
     except Exception as e:
-        raise HTTPException(status_code=502, detail=f"Proxy to n8n failed: {e}")
+        return JSONResponse(status_code=502, content={"error": f"Proxy to n8n failed", "detail": str(e)})
+
 
 from fastapi import Path as FPath
 @app.api_route("/agent/proxy/n8n/{path:path}", methods=["GET","POST","PUT","PATCH","DELETE","OPTIONS"], include_in_schema=False)
