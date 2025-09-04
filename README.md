@@ -10,17 +10,14 @@ This service exposes the CaiaAgent API as a separate Railway service and proxies
 - `/agent/proxy/n8n/{path}` (Bearer) → generic proxy
 
 ## Env Vars
-- `N8N_WEBHOOK_BASE` (required) e.g. `https://caia-agent-production.up.railway.app`
+- `N8N_WEBHOOK_BASE` (required) e.g. `https://caia-agent-production.up.railway.app/webhook`
 - `CAIA_AGENT_KEY` (recommended; protects /agent/*)
 - `N8N_UI_URL` (optional) → root redirect
-- `DEFAULT_WEBHOOK_PATH` (optional) → message-only payload support
-- `CAIA_PORT=8080`
+- `DEFAULT_WEBHOOK_PATH` (optional) → default webhook when none provided
+- `LOG_LEVEL` (optional)
 
 ## Deploy (Railway)
-1) Create a new GitHub repo with these files.
-2) Railway → New Project → Deploy from GitHub.
-3) Set variables:
-   - `N8N_WEBHOOK_BASE=https://<your-n8n>.up.railway.app`
-   - `CAIA_AGENT_KEY=<random-long-token>`
-   - `N8N_UI_URL=https://<your-n8n>.up.railway.app` (optional)
-4) Redeploy.
+1. Create a new Railway project.
+2. Upload or link this repo.
+3. Set environment variables.
+4. Deploy and check `/health`.
