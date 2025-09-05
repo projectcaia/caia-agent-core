@@ -17,6 +17,13 @@ async def status():
         "decision_capability": decision_engine.get_capabilities()
     }
 
+@app.get("/health")
+async def health():
+    return {
+        "ok": True,
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+
 @app.post("/orchestrate")
 async def orchestrate(request: Request):
     body = await request.json()
