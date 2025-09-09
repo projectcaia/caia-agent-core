@@ -30,7 +30,10 @@ class N8NClient:
 
     # ---- internal HTTP ----
     def _headers(self) -> Dict[str, str]:
+        # n8n Public API는 X-N8N-API-KEY 헤더를 기본으로 사용
         return {
+            "X-N8N-API-KEY": self.api_key,
+            # 호환성 위해 Authorization도 함께 전송(없어도 됨)
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
             "Accept": "application/json",
