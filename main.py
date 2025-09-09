@@ -3,10 +3,10 @@ from datetime import datetime, timezone
 from typing import Optional
 import os
 
-from memory import MemoryManager  # local
-from decision import DecisionEngine  # local
-from security import check_bearer  # local
-from caia_n8n_client import (      # local
+from memory import MemoryManager
+from decision import DecisionEngine
+from security import check_bearer
+from caia_n8n_client import (
     N8NClient, N8NAutomation,
     build_wf_mail_digest, build_wf_tg_to_gmail,
     build_wf_failure_guard, build_wf_health_heartbeat,
@@ -17,9 +17,7 @@ app = FastAPI(title="CaiaAgent Core", version="3.0.0")
 memory = MemoryManager()
 decision_engine = DecisionEngine()
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Env
-# ─────────────────────────────────────────────────────────────────────────────
+# ── Env
 N8N_API_URL = os.getenv("N8N_API_URL", "").rstrip("/")
 N8N_API_KEY = os.getenv("N8N_API_KEY", "")
 CAIA_AGENT_KEY = os.getenv("CAIA_AGENT_KEY", "")
@@ -33,7 +31,7 @@ async def _n8n_client() -> N8NClient:
     return N8NClient(N8N_API_URL, N8N_API_KEY)
 
 def _auth_or_anon(authorization: Optional[str]):
-    # 운영 중 보호 원하면 아래 주석 해제
+    # 보호가 필요하면 아래 주석 해제
     # if not authorization or not authorization.startswith("Bearer "):
     #     raise HTTPException(status_code=401, detail="Missing bearer")
     # token = authorization.split(" ", 1)[1]
@@ -41,9 +39,7 @@ def _auth_or_anon(authorization: Optional[str]):
     #     raise HTTPException(status_code=403, detail="Invalid token")
     return True
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Core
-# ─────────────────────────────────────────────────────────────────────────────
+# ── Core
 @app.get("/health")
 async def health():
     return {"ok": True, "timestamp": datetime.now(timezone.utc).isoformat()}
@@ -75,20 +71,16 @@ async def report(request: Request):
     await memory.store(body)
     return {"status": "remembered"}
 
-# ─────────────────────────────────────────────────────────────────────────────
-# n8n Adapter
-# ─────────────────────────────────────────────────────────────────────────────
+# ── n8n Adapter
 @app.post("/n8n/bootstrap")
 async def n8n_bootstrap(authorization: Optional[str] = Header(None)):
     _auth_or_anon(authorization)
     client = await _n8n_client()
     auto = N8NAutomation(client)
 
-    # WF-1: Daily Mail Digest (09:00)
     wf1 = await build_wf_mail_digest(client)
     wf1_id, wf1_test = await auto.deploy_spec(wf1, test=True)
 
-    # WF-2: Telegram → Gmail (whitelist + keyword)
     wf2 = await build_wf_tg_to_gmail(
         client,
         tg_chat_whitelist=[os.getenv("N8N_TG_CHAT_ID", "")],
@@ -96,11 +88,9 @@ async def n8n_bootstrap(authorization: Optional[str] = Header(None)):
     )
     wf2_id, wf2_test = await auto.deploy_spec(wf2, test=False)
 
-    # WF-3: Failure Guard
     wf3 = await build_wf_failure_guard(client)
     wf3_id, wf3_test = await auto.deploy_spec(wf3, test=False)
 
-    # WF-4: Health Heartbeat (08:55)
     wf4 = await build_wf_health_heartbeat(client, report_chat_id=os.getenv("N8N_TG_CHAT_ID", ""))
     wf4_id, wf4_test = await auto.deploy_spec(wf4, test=False)
 
