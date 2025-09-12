@@ -26,20 +26,42 @@ decision_engine = DecisionEngine()
 # 환경변수
 N8N_API_URL = os.getenv("N8N_API_URL", "").rstrip("/")
 N8N_API_KEY = os.getenv("N8N_API_KEY", "")
+N8N_BASIC_AUTH_USER = os.getenv("N8N_BASIC_AUTH_USER", "")
+N8N_BASIC_AUTH_PASSWORD = os.getenv("N8N_BASIC_AUTH_PASSWORD", "")
 CAIA_AGENT_KEY = os.getenv("CAIA_AGENT_KEY", "")
 
-def _assert_n8n_ready():
-    """n8n 설정 확인"""
-    if not N8N_API_URL or not N8N_API_KEY:
-        logger.error("Missing N8N_API_URL or N8N_API_KEY")
+def _assert_n8n_ready() -> bool:
+    """
+    Validate that n8n configuration is present. n8n is considered
+    configured if the API URL is set and either an API key or
+    BasicAuth credentials are provided. This ensures that the
+    downstream N8NClient can authenticate.
+    """
+    if not N8N_API_URL:
+        logger.error("Missing N8N_API_URL")
         return False
+
+    # At least one authentication method must be present
+    has_api_key = bool(N8N_API_KEY)
+    has_basic = bool(N8N_BASIC_AUTH_USER and N8N_BASIC_AUTH_PASSWORD)
+    if not (has_api_key or has_basic):
+        logger.error("Missing n8n authentication; set N8N_API_KEY or N8N_BASIC_AUTH_USER/PASSWORD")
+        return False
+
     return True
 
 async def _n8n_client() -> Optional[N8NClient]:
     """n8n 클라이언트 생성"""
     if not _assert_n8n_ready():
         return None
-    return N8NClient(N8N_API_URL, N8N_API_KEY)
+    # Pass both API key and BasicAuth credentials to the client; it
+    # will determine which to use internally.
+    return N8NClient(
+        base_url=N8N_API_URL,
+        api_key=N8N_API_KEY if N8N_API_KEY else None,
+        basic_user=N8N_BASIC_AUTH_USER if N8N_BASIC_AUTH_USER else None,
+        basic_password=N8N_BASIC_AUTH_PASSWORD if N8N_BASIC_AUTH_PASSWORD else None,
+    )
 
 def _auth_or_anon(authorization: Optional[str]):
     """인증 체크 (옵션)"""
