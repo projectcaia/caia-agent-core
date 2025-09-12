@@ -58,12 +58,8 @@ class N8NClient:
         """
         Build request headers for n8n API calls.
 
-        If BasicAuth credentials are available, return headers
-        containing a single `Authorization: Basic <base64>` header.
-        Otherwise, if an API key is available, return headers
-        containing `X-N8N-API-KEY` only. If neither is available,
-        an exception is raised to indicate that authentication is
-        not configured.
+        Always use X-N8N-API-KEY header for API key authentication.
+        BasicAuth is only used when basic credentials are provided.
         """
         base_headers = {
             "Content-Type": "application/json",
@@ -76,7 +72,7 @@ class N8NClient:
             token = base64.b64encode(f"{self.basic_user}:{self.basic_password}".encode()).decode()
             return {**base_headers, "Authorization": f"Basic {token}"}
 
-        # Use API key if provided
+        # Use API key with X-N8N-API-KEY header (NOT Bearer token)
         if self.api_key:
             return {**base_headers, "X-N8N-API-KEY": self.api_key}
 
