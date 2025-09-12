@@ -345,6 +345,24 @@ async def n8n_deactivate_workflow(workflow_id: str, authorization: Optional[str]
         logger.error(f"Deactivate workflow error: {e}")
         return {"ok": False, "where": f"deactivate.{workflow_id}", "error": str(e)}
 
+@app.delete("/n8n/workflows/{workflow_id}")
+async def n8n_delete_workflow(workflow_id: str, authorization: Optional[str] = Header(None)):
+    """워크플로우 삭제"""
+    try:
+        _auth_or_anon(authorization)
+        
+        client = await _n8n_client()
+        if not client:
+            return {"ok": False, "error": "n8n not configured"}
+        
+        result = await client.delete_workflow(workflow_id)
+        await client.close()
+        return result
+        
+    except Exception as e:
+        logger.error(f"Delete workflow error: {e}")
+        return {"ok": False, "where": f"delete.{workflow_id}", "error": str(e)}
+
 @app.post("/n8n/workflows/{workflow_id}/test")
 async def n8n_test_workflow(workflow_id: str, body: Optional[dict] = None, authorization: Optional[str] = Header(None)):
     """워크플로우 테스트 실행"""
