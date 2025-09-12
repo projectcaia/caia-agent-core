@@ -151,10 +151,12 @@ class N8NClient:
         if self._session and not self._session.closed:
             await self._session.close()
 
+# (앞부분 동일)
+
     # ---- credentials ----
     async def list_credentials(self) -> Dict[str, Any]:
         """크레덴셜 목록 조회"""
-        return await self._request_with_retry("GET", "/rest/credentials")
+        return await self._request_with_retry("GET", "/api/v1/credentials")
 
     async def get_credential_by_name(self, name: str) -> Optional[Dict[str, Any]]:
         """이름으로 크레덴셜 찾기"""
@@ -174,29 +176,29 @@ class N8NClient:
 
     # ---- workflows ----
     async def list_workflows(self) -> Dict[str, Any]:
-        return await self._request_with_retry("GET", "/rest/workflows")
+        return await self._request_with_retry("GET", "/api/v1/workflows")
 
     async def get_workflow(self, workflow_id: str) -> Dict[str, Any]:
-        return await self._request_with_retry("GET", f"/rest/workflows/{workflow_id}")
+        return await self._request_with_retry("GET", f"/api/v1/workflows/{workflow_id}")
 
     async def create_workflow(self, spec: Dict[str, Any]) -> Dict[str, Any]:
-        return await self._request_with_retry("POST", "/rest/workflows", json_body=spec)
+        return await self._request_with_retry("POST", "/api/v1/workflows", json_body=spec)
 
     async def update_workflow(self, workflow_id: str, spec: Dict[str, Any]) -> Dict[str, Any]:
-        return await self._request_with_retry("PATCH", f"/rest/workflows/{workflow_id}", json_body=spec)
+        return await self._request_with_retry("PATCH", f"/api/v1/workflows/{workflow_id}", json_body=spec)
 
     async def delete_workflow(self, workflow_id: str) -> Dict[str, Any]:
-        return await self._request_with_retry("DELETE", f"/rest/workflows/{workflow_id}")
+        return await self._request_with_retry("DELETE", f"/api/v1/workflows/{workflow_id}")
 
     async def activate_workflow(self, workflow_id: str) -> Dict[str, Any]:
-        return await self._request_with_retry("POST", f"/rest/workflows/{workflow_id}/activate")
+        return await self._request_with_retry("POST", f"/api/v1/workflows/{workflow_id}/activate")
 
     async def deactivate_workflow(self, workflow_id: str) -> Dict[str, Any]:
-        return await self._request_with_retry("POST", f"/rest/workflows/{workflow_id}/deactivate")
+        return await self._request_with_retry("POST", f"/api/v1/workflows/{workflow_id}/deactivate")
 
     async def run_workflow_once(self, workflow_id: str, run_data: Dict[str, Any] = None) -> Dict[str, Any]:
         """워크플로우 실행 (지원 안 되면 힌트 반환)"""
-        result = await self._request_with_retry("POST", f"/rest/workflows/{workflow_id}/run", json_body=run_data or {})
+        result = await self._request_with_retry("POST", f"/api/v1/workflows/{workflow_id}/run", json_body=run_data or {})
         
         if not result.get("ok"):
             error = result.get("error", {})
@@ -209,7 +211,8 @@ class N8NClient:
         params: Dict[str, Any] = {"limit": limit}
         if workflow_id:
             params["workflowId"] = workflow_id
-        return await self._request_with_retry("GET", "/rest/executions", params=params)
+        return await self._request_with_retry("GET", "/api/v1/executions", params=params)
+
 
 
 # ─────────────────────────────────────────────────────────────────────────────
