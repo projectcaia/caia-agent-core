@@ -1,0 +1,14 @@
+repos:
+  - name: caia-agent-core
+    branch_prefix: auto
+    default_base: main
+    commit_template: "{type}: {summary}"
+    pr_title_template: "[auto-evolve] {summary}"
+    pr_labels: ["auto", "ci"]
+    windows_test_command: ".venv\\Scripts\\python.exe -m pytest -q"
+    build_logs: "logs/build.log"
+    deploy_logs: "logs/deploy.log"
+
+rules:
+  retries: 2
+  require_health_endpoints: ["/health", "/mcp", "/docs"]

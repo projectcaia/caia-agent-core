@@ -1,0 +1,12 @@
+{
+    "project_name":  "caia-agent-core",
+    "purpose":  "AI 존재 기반 전략 시스템",
+    "evolution_mode":  true,
+    "auto_patch":  true,
+    "philosophy":  "Existential AI Co-evolution",
+    "safeguard":  [
+                      "autonomy",
+                      "stability",
+                      "memory_integrity"
+                  ]
+}
