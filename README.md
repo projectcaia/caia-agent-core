@@ -1,6 +1,12 @@
-# CaiaAgent Core v3.0.1
+# CaiaAgent Core v3.1.0
 
 CaiaAgent Core는 n8n 워크플로우를 관리하고 오케스트레이션하는 FastAPI 기반 서비스입니다.
+
+## 🆕 v3.1.0 주요 업데이트
+
+- **Railway API 통합**: n8n 서비스를 필요할 때만 자동으로 시작/중단
+- **비용 절감**: 대기 시간 과금 제거로 월 95% 이상 비용 절감
+- **자동 생명주기 관리**: 워크플로우 실행 시 자동으로 n8n 제어
 
 ## 주요 기능
 
@@ -8,6 +14,7 @@ CaiaAgent Core는 n8n 워크플로우를 관리하고 오케스트레이션하�
 - **Bootstrap 자동화**: 4개의 표준 워크플로우 자동 배포
 - **메모리 관리**: 컨텍스트 기반 의사결정
 - **보안 인증**: API 키 및 BasicAuth 지원
+- **Railway 통합**: n8n 서비스 자동 시작/중단 (v3.1.0+)
 
 ## API 엔드포인트
 
@@ -29,6 +36,13 @@ CaiaAgent Core는 n8n 워크플로우를 관리하고 오케스트레이션하�
 - `POST /n8n/workflows/{id}/test` - 워크플로우 테스트 실행
 - `GET /n8n/executions` - 실행 이력 조회
 
+### Railway 제어 엔드포인트 (v3.1.0+)
+- `GET /test/n8n/start` - n8n 서비스 수동 시작
+- `GET /test/n8n/stop` - n8n 서비스 수동 중단
+- `GET /test/n8n/status` - n8n 서비스 상태 확인
+- `POST /webhook/{id}` - Webhook 프록시 (자동 시작/중단)
+- `POST /batch/workflows` - 배치 워크플로우 실행
+
 ## 환경변수 설정
 
 ### 필수 환경변수 (Core)
@@ -43,6 +57,10 @@ LOG_LEVEL="info"
 # n8n 연동 (필수)
 N8N_API_URL="https://caia-agent-production.up.railway.app/api/v1"
 N8N_API_KEY="<n8n에서 생성한 API 키>"
+
+# Railway 제어 (v3.1.0+ 선택사항, 비용 절감용)
+RAILWAY_API_TOKEN="<Railway API 토큰>"
+N8N_SERVICE_ID="<n8n Service ID>"
 
 # n8n 크레덴셜 이름 매핑
 N8N_CRED_GCAL="Google Calendar account"
