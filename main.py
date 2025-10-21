@@ -73,6 +73,34 @@ def _auth_or_anon(authorization: Optional[str]):
     #     raise HTTPException(status_code=403, detail="Invalid token")
     return True
 
+# ── Root Endpoint ──
+@app.get("/")
+async def root():
+    """루트 엔드포인트 - API 정보 제공"""
+    return {
+        "name": "CaiaAgent Core",
+        "version": "3.0.1",
+        "status": "operational",
+        "description": "n8n workflow orchestration service",
+        "docs": "/docs",
+        "health": "/health",
+        "n8n_configured": _assert_n8n_ready(),
+        "endpoints": {
+            "core": [
+                "/health",
+                "/status",
+                "/orchestrate",
+                "/report"
+            ],
+            "n8n": [
+                "/n8n/bootstrap",
+                "/n8n/workflows",
+                "/n8n/executions"
+            ]
+        },
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+
 # ── Core Endpoints ──
 @app.get("/health")
 async def health():
@@ -406,7 +434,26 @@ async def n8n_list_executions(workflowId: Optional[str] = None, limit: int = 20,
 # 서버 시작시 로그
 @app.on_event("startup")
 async def startup_event():
-    logger.info(f"CaiaAgent Core v3.0.1 started")
+    logger.info("="*50)
+    logger.info("CaiaAgent Core v3.0.1 started")
+    logger.info("="*50)
+    
+    # 환경변수 상태 로깅
     logger.info(f"n8n configured: {_assert_n8n_ready()}")
     if N8N_API_URL:
         logger.info(f"n8n URL: {N8N_API_URL}")
+    else:
+        logger.warning("N8N_API_URL not set - n8n features disabled")
+    
+    if N8N_API_KEY:
+        logger.info(f"N8N_API_KEY: {'*' * 10}{N8N_API_KEY[-4:] if len(N8N_API_KEY) > 4 else '****'}")
+    elif N8N_BASIC_AUTH_USER:
+        logger.info(f"Using BasicAuth for n8n (user: {N8N_BASIC_AUTH_USER})")
+    else:
+        logger.warning("No n8n authentication configured")
+    
+    logger.info(f"CAIA_AGENT_KEY configured: {bool(CAIA_AGENT_KEY)}")
+    logger.info("="*50)
+    logger.info("API Documentation available at: /docs")
+    logger.info("OpenAPI schema available at: /openapi.json")
+    logger.info("="*50)
